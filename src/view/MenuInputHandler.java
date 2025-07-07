@@ -12,7 +12,8 @@ public class MenuInputHandler {
                 String input = scanner.nextLine().trim();
                 return Integer.parseInt(input);
             } catch (NumberFormatException e) {
-                System.out.print("숫자를 입력하세요: ");
+            	System.out.print("숫자를 입력하세요: ");
+            	//e.printStackTrace();
             }
         }
     }

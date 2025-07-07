@@ -15,7 +15,9 @@ public class SeatPrinter {
             for (int j = 0; j < seats[i].length; j++) {
             	
                 String name = seats[i][j];
-                if (name == null || name.isBlank()) name = "";
+                if (name == null || name.isBlank()) {
+                	name = "";//null ?????
+                }
 
                 // 가운데 정렬된 이름 (7칸 고정)
                 String centeredName = centerText(name, 5);
