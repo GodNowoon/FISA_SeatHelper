@@ -33,11 +33,11 @@ public class Model {
 
     	// 중앙자리 먼저 배치
     	// 가로위치 홀수이면 바뀌긴 하는데 일단 놔둬
-    	students[0][SeatInfo.COL/2-1] = getRandNotPicked(picked);
-        students[0][SeatInfo.COL/2] = getRandNotPicked(picked);
+    	students[0][SeatInfo.COL/2-1] = getRandStudentNotPicked(picked);
+        students[0][SeatInfo.COL/2] = getRandStudentNotPicked(picked);
         for(int r=1; r<SeatInfo.ROW; r++) {
-        	students[r][0] = getRandNotPicked(picked);
-            students[r][SeatInfo.COL-1] = getRandNotPicked(picked);
+        	students[r][0] = getRandStudentNotPicked(picked);
+            students[r][SeatInfo.COL-1] = getRandStudentNotPicked(picked);
         }
         
         // 중앙자리로부터 좌우로 배치
@@ -84,13 +84,13 @@ public class Model {
     }
     
     private Student getRandStudentNotPicked(ArrayList<Integer> picked) {
-    	Student student = db.getRandomStudent(true, picked);
+    	//Student student = db.getRandomStudent(true, picked);
     	picked.add(student.getNo());
     	return student;
     }
     
     private Student getParentStudentNotPicked(int no, ArrayList<Integer> picked) {
-    	Student student = getPartnerStudentByNo(no, picked);
+    	//Student student = getPartnerStudentByNo(no, picked);
 		picked.add(student.getNo());
 		return student;
     }
