@@ -20,7 +20,7 @@ public class Model {
     }
 
     // 1. 전체 수강생 목록 가져오기
-    public ArrayList<Student> getStudents() {
+    public ArrayList<Student> getStudents() throws SQLException {
         return db.getAllStudents();
     }
 
@@ -68,7 +68,7 @@ public class Model {
     }
     
     public String[][] getCurrentSeat() {
-    	db.getCurrentSeat();
+    	return db.getCurrentSeat();
     }
     
     public void saveCurrentSeat() {
