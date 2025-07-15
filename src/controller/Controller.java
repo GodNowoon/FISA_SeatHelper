@@ -20,14 +20,18 @@ public class Controller {
 
 	// 1. 전체 수강생 목록 가져오기
 	public static void getAllStudents() {
-		ArrayList<Student> students = model.getStudents();
-
-		if (!students.isEmpty()) {
-			for (Student student : students) {
-				stuPrinter.print(student);
+		try {
+			ArrayList<Student> students = model.getStudents();
+			if (!students.isEmpty()) {
+				for (Student student : students) {
+					stuPrinter.print(student);
+				}
+			} else {
+				view.printMessage("저장된 학생 데이터가 없습니다.");
 			}
-		} else {
-			view.printMessage("저장된 학생 데이터가 없습니다.");
+			
+		} catch(Exception e) {
+			e.printStackTrace();
 		}
 	}
 

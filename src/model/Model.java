@@ -20,7 +20,7 @@ public class Model {
     }
 
     // 1. 전체 수강생 목록 가져오기
-    public ArrayList<Student> getStudents() {
+    public ArrayList<Student> getStudents() throws SQLException {
         return db.getAllStudents();
     }
 
@@ -68,7 +68,7 @@ public class Model {
     }
     
     public String[][] getCurrentSeat() {
-    	db.getCurrentSeat();
+    	return db.getCurrentSeat();
     }
     
     public void saveCurrentSeat() {
@@ -83,14 +83,14 @@ public class Model {
     	str2 = temp;
     }
     
-    private Student getRandStudentNotPicked(ArrayList<Integer> picked) {
-    	//Student student = db.getRandomStudent(true, picked);
+    private Student getRandStudentNotPicked(ArrayList<Integer> picked) throws SQLException {
+    	Student student = db.getRandomStudent(true, picked);
     	picked.add(student.getNo());
     	return student;
     }
     
-    private Student getParentStudentNotPicked(int no, ArrayList<Integer> picked) {
-    	//Student student = getPartnerStudentByNo(no, picked);
+    private Student getParentStudentNotPicked(int no, ArrayList<Integer> picked) throws SQLException {
+    	Student student = db.getPartnerStudentByNo(no, picked);
 		picked.add(student.getNo());
 		return student;
     }
