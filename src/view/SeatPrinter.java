@@ -45,4 +45,17 @@ public class SeatPrinter {
         int padRight = padding - padLeft;
         return " ".repeat(padLeft) + text + " ".repeat(padRight);
     }
+    
+    // 현재 자리 배치
+    public void printSeatLayout(String[][] seats) {
+        System.out.println("\n📌 현재 자리 배치\n");
+        for (String[] row : seats) {
+            for (String seat : row) {
+                System.out.printf("[%s] ", seat);
+            }
+            System.out.println();
+        }
+        System.out.println();
+    }
+
 }

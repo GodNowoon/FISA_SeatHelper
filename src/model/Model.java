@@ -1,5 +1,8 @@
 package model;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -68,7 +71,24 @@ public class Model {
     }
     
     public String[][] getCurrentSeat() {
-    	return db.getCurrentSeat();
+    	 String[][] seats = new String[4][8];
+    	    String filePath = "src/database/seat.txt";
+
+    	    try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
+    	        String line;
+    	        int row = 0;
+    	        while ((line = br.readLine()) != null && row < 4) {
+    	            String[] tokens = line.split("#");
+    	            for (int col = 0; col < tokens.length && col < 8; col++) {
+    	                seats[row][col] = tokens[col];
+    	            }
+    	            row++;
+    	        }
+    	    } catch (IOException e) {
+    	        e.printStackTrace();
+    	    }
+
+    	    return seats;
     }
     
     public void saveCurrentSeat() {
