@@ -1,12 +1,12 @@
 package database;
 
 import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 @Getter
 @Setter
 public class Student {
@@ -15,5 +15,4 @@ public class Student {
 	int age;
 	String mbti;
 	boolean glass;
-	
 }

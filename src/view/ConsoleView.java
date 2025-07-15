@@ -10,6 +10,7 @@ import static view.AnsiColor.RESET;
 import static view.AnsiColor.YELLOW;
 
 public class ConsoleView {
+	
     private final MenuInputHandler inputHandler;
     private final SeatPrinter seatPrinter;
 
