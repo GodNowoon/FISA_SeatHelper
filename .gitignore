@@ -25,3 +25,5 @@ replay_pid*
 /bin/
 /target/
 target/
+
+dbinfo.propertiesdbinfo.properties
