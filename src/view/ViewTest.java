@@ -1,5 +1,7 @@
 package view;
 
+import database.Database;
+
 public class ViewTest {
 	public static void main(String[] args) {
 		ConsoleView view = new ConsoleView();
@@ -18,5 +20,6 @@ public class ViewTest {
 		else { 
 			System.out.println("잘못된 입력입니다."); 
 		}
+//		Database.closeSSHTunnel();
 	}
 }
