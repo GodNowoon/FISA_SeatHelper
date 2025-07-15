@@ -37,13 +37,6 @@ public class Controller {
 
 	// 2. 랜덤 자리 출력
 	public static void printRandomSeats() throws SQLException {
-		/*
-		 * int rows = 4; int cols = 8;
-		 * 
-		 * String[][] seatArr = model.getRandomSeat(rows, cols);
-		 * seatPrinter.print(seatArr);
-		 */
-        
         String[][] randomSeats = model.getRandomSeat();
         lastRandomSeats = randomSeats;
         view.printSeatLayout(randomSeats);

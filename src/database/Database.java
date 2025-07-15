@@ -149,7 +149,47 @@ public class Database {
 		return student;
 	}
 	
-	public Student getRandomStudent(boolean glass, ArrayList<Integer> picked) {
-		return null;
+	public Student getRandomStudent(boolean useGlassCondition, ArrayList<Integer> picked) throws SQLException {
+	    String sql;
+	    if (picked == null || picked.isEmpty()) {
+	        sql = useGlassCondition
+	            ? "SELECT * FROM student WHERE glass = ? ORDER BY RAND() LIMIT 1"
+	            : "SELECT * FROM student ORDER BY RAND() LIMIT 1";
+	    } else {
+	        String placeholders = picked.stream().map(x -> "?").collect(Collectors.joining(", "));
+	        sql = useGlassCondition
+	            ? "SELECT * FROM student WHERE glass = ? AND no NOT IN (" + placeholders + ") ORDER BY RAND() LIMIT 1"
+	            : "SELECT * FROM student WHERE no NOT IN (" + placeholders + ") ORDER BY RAND() LIMIT 1";
+	    }
+
+	    Student student = null;
+
+	    try (Connection conn = DBUtil.getConnection();
+	         PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+	        int index = 1;
+	        if (useGlassCondition) {
+	            pstmt.setBoolean(index++, true);
+	        }
+
+	        if (picked != null && !picked.isEmpty()) {
+	            for (Integer p : picked) {
+	                pstmt.setInt(index++, p);
+	            }
+	        }
+
+	        ResultSet rs = pstmt.executeQuery();
+	        if (rs.next()) {
+	            student = new Student();
+	            student.no = rs.getInt("no");
+	            student.name = rs.getString("name");
+	            student.age = rs.getInt("age");
+	            student.mbti = rs.getString("mbti");
+	            student.glass = rs.getBoolean("glass");
+	        }
+	    }
+
+	    return student;
 	}
+
 }
