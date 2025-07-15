@@ -1,11 +1,5 @@
 package view;
 
-import static view.AnsiColor.BOLD;
-import static view.AnsiColor.CYAN;
-import static view.AnsiColor.RESET;
-
-import java.util.List;
-
 import database.Student;
 
 public class StudentPrinter {
