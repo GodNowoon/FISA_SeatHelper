@@ -3,70 +3,177 @@ package database;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.io.IOException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.StringTokenizer;
+import java.util.stream.Collectors;
+
+import org.junit.Test;
+
+import info.SeatInfo;
 
 public class Database {
-	
-	private static String studentFile = "src/database/student.txt";
 	private static String seatFile = "src/database/seat.txt";
+	private static String[][] currentSeat = new String[SeatInfo.ROW][SeatInfo.COL];
 
-	private static ArrayList<Student> students = new ArrayList<>();
-	private static int[][] seats = new int[4][8];
-	
 	static {
-		BufferedReader br;
-		
+		BufferedReader br = null;
 		try {
-			// 학생정보 읽기
-			FileReader fileReader = new FileReader(new File(studentFile));
-			br = new BufferedReader(fileReader);
-			
-			String line = "";
-			while((line = br.readLine()) != null) {
-				StringTokenizer st = new StringTokenizer(line, "#");
-				
-				int num = Integer.parseInt(st.nextToken());
-				String name = st.nextToken();
-				int age = Integer.parseInt(st.nextToken());
-				String mbti = st.nextToken();
-				boolean glass = (st.nextToken() == "TRUE");
-								
-				students.add(new Student(num, name, age, mbti, glass));
-			}
-			
 			// 책상정보 읽기
-			fileReader = new FileReader(new File(seatFile));
+			FileReader fileReader = new FileReader(new File(seatFile));
 			br = new BufferedReader(fileReader);
-			
-			line = "";
-			while((line = br.readLine()) != null) {
+
+			String line = "";
+			while ((line = br.readLine()) != null) {
 				StringTokenizer st = new StringTokenizer(line, "#");
-				
-				for(int i=0;i<4;i++){
-				int num = Integer.parseInt(st.nextToken());
-					for(int j=0;j<8;j++) {
-						seats[i][j]=num;
+
+				for (int i = 0; i < SeatInfo.ROW; i++) {
+					String name = st.nextToken();
+					for (int j = 0; j < SeatInfo.COL; j++) {
+						currentSeat[i][j] = name;
 					}
 				}
-			}			
-		} catch(Exception e) {
+			}
+		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
-//			br.close();
+			try {
+				br.close();
+			} catch(IOException e) {
+				e.printStackTrace();
+			}
 		}
 	}
-	
-	public ArrayList<Student> getAllStudents() {
+
+	public String[][] getCurrentSeat() {
+		return currentSeat;
+	}
+
+	public void saveCurrentSeat() {
+		// 코드 작성 필요
+	}
+
+	@Test
+	public ArrayList<Student> getAllStudents() throws SQLException {
+
+		String sql = "select * from student";
+
+		ArrayList<Student> students = null;
+
+		try (Connection conn = DBUtil.getConnection(); 
+				PreparedStatement pstmt = conn.prepareStatement(sql);) {
+			
+			ResultSet rs = pstmt.executeQuery();
+
+			students = new ArrayList<>();
+			while (rs.next()) {
+				Student student = new Student();
+
+				student.no = rs.getInt("no");
+				student.name = rs.getString("name");
+				student.age = rs.getInt("age");
+				student.mbti = rs.getString("mbti");
+				student.glass = rs.getBoolean("glass");
+
+				students.add(student);
+			}
+		}
+
 		return students;
 	}
-	
-	public ArrayList<Student> getStudentsNamebyNumber() {
-		return students;
+
+	public Student getPartnerStudentByNo(int no, ArrayList<Integer> picked) throws SQLException {
+
+		ArrayList<Integer> excluded = new ArrayList<>(picked);
+		excluded.add(no);
+
+		// IN (?, ?, ?, ...) 생성
+		String placeholders = excluded.stream().map(x -> "?").collect(Collectors.joining(", "));
+
+		String sql = "SELECT s.no, s.name, s.age, s.mbti, s.glass " 
+				+ "FROM partner_history ph "
+				+ "JOIN student s ON ph.partner_no = s.no " 
+				+ "WHERE ph.student_no = ? "
+				+ "AND ph.partner_no NOT IN (" + placeholders + ") " 
+				+ "GROUP BY ph.partner_no " 
+				+ "ORDER BY COUNT(*) ASC, ph.partner_no ASC "
+				+ "LIMIT 1";
+
+		Student student = null;
+
+		try (Connection conn = DBUtil.getConnection(); 
+				PreparedStatement pstmt = conn.prepareStatement(sql);) {
+
+			int index = 1;
+			pstmt.setInt(index++, no);
+			// 다음 파라미터들: picked + student_no
+			for (Integer ex : excluded) {
+				pstmt.setInt(index++, ex);
+			}
+
+			ResultSet rs = pstmt.executeQuery();
+
+			if (rs.next()) {
+				student = new Student();
+				student.no = rs.getInt("no");
+				student.name = rs.getString("name");
+				student.age = rs.getInt("age");
+				student.mbti = rs.getString("mbti");
+				student.glass = rs.getBoolean("glass");
+			}
+		}
+
+		return student;
 	}
-	
-	public int[][] getAllSeat() {
-		return seats;
+
+	public Student getRandomStudent(boolean glass, ArrayList<Integer> picked) throws SQLException {
+		String sql;
+		// 죄송합니다 강사님 수정하도록 하겠습니다 사랑합니다
+		if (picked == null || picked.isEmpty()) {
+			if(glass) {
+				sql = "SELECT * FROM student WHERE glass = ? ORDER BY RAND() LIMIT 1";
+			} else {
+				sql = "SELECT * FROM student ORDER BY RAND() LIMIT 1";
+			}
+		} else {
+			String placeholders = picked.stream().map(x -> "?").collect(Collectors.joining(", "));
+			sql = glass ? "SELECT * FROM student WHERE glass = ? AND no NOT IN (" + placeholders
+							+ ") ORDER BY RAND() LIMIT 1"
+					: "SELECT * FROM student WHERE no NOT IN (" + placeholders + ") ORDER BY RAND() LIMIT 1";
+		}
+
+		Student student = null;
+
+		try (Connection conn = DBUtil.getConnection(); 
+				PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+			int index = 1;
+			if (glass) {
+				pstmt.setBoolean(index++, true);
+			}
+
+			if (picked != null && !picked.isEmpty()) {
+				for (Integer p : picked) {
+					pstmt.setInt(index++, p);
+				}
+			}
+
+			ResultSet rs = pstmt.executeQuery();
+			if (rs.next()) {
+				student = new Student();
+				student.no = rs.getInt("no");
+				student.name = rs.getString("name");
+				student.age = rs.getInt("age");
+				student.mbti = rs.getString("mbti");
+				student.glass = rs.getBoolean("glass");
+			}
+		}
+
+		return student;
 	}
-	
+
 }

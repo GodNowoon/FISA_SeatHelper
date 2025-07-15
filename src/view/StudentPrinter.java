@@ -1,20 +1,16 @@
 package view;
 
-import static view.AnsiColor.BOLD;
-import static view.AnsiColor.CYAN;
-import static view.AnsiColor.RESET;
-
-import java.util.List;
-
 import database.Student;
 
 public class StudentPrinter {
     public void print(Student stu) {
-        System.out.println("번호: " + stu.getNo());
-        System.out.println("이름: " + stu.getName());
-        System.out.println("출생연도: " + stu.getAge());
-        System.out.println("MBTI: " + stu.getMbti());
-        System.out.println("안경 여부: " + (stu.isGlass() ? "착용" : "미착용"));
-        System.out.println("--------------------------");
+    	System.out.println(
+    		    String.format("|%2d | %-6s | %-4d | %-4s |",
+    		        stu.getNo(),
+    		        stu.getName() + (stu.isGlass() ? " 👓" : "  "),
+    		        stu.getAge(),
+    		        stu.getMbti()
+    		    )
+    		);
     }
 }
