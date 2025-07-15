@@ -12,6 +12,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.StringTokenizer;
+import java.util.stream.Collectors;
 
 import info.SeatInfo;
 
@@ -97,36 +98,52 @@ public class Database {
 		return students;
 	}
 	
-	public Student getPartnerStudentByNo(int no, ArrayList<Integer> picked) {
+	public Student getPartnerStudentByNo(int no, ArrayList<Integer> picked) throws SQLException {
+
+	    ArrayList<Integer> excluded = new ArrayList<>(picked);
+	    excluded.add(no);
+
+	    // IN (?, ?, ?, ...) 생성
+	    String placeholders = excluded.stream()
+	                                  .map(x -> "?")
+	                                  .collect(Collectors.joining(", "));
+
 		
-		String sql = "SELECT partner_no " +
-	             "FROM partner_history " +
-	             "WHERE student_no = ? " +
-	             "AND partner_no BETWEEN 1 AND 30 " +
-	             "AND partner_no NOT IN (" + placeholders + ") " +
-	             "GROUP BY partner_no " +
-	             "ORDER BY COUNT(*) ASC, partner_no ASC " +
+	    String sql = "SELECT s.no, s.name, s.age, s.mbti, s.glass " +
+	             "FROM partner_history ph " +
+	             "JOIN student s ON ph.partner_no = s.no " +
+	             "WHERE ph.student_no = ? " +
+	             "AND ph.partner_no NOT IN (" + placeholders + ") " +
+	             "GROUP BY ph.partner_no " +
+	             "ORDER BY COUNT(*) ASC, ph.partner_no ASC " +
 	             "LIMIT 1";
+	    
+	    Student student = null;
+
 		
 		try(Connection conn = DBUtil.getConnection();
 				PreparedStatement pstmt = conn.prepareStatement(sql);) {
-			ResultSet rs = pstmt.executeQuery();
 			
-			students = new ArrayList<>();
-			while(rs.next()) {
-				Student student = new Student();
-				
-	            student.no = rs.getInt("no");
-	            student.name = rs.getString("name");
-	            student.age = rs.getInt("age");
-	            student.mbti = rs.getString("mbti");
-	            student.glass = rs.getBoolean("glass");
-
-	            students.add(student);
-			}
+			int index = 1;
+	        pstmt.setInt(index++, no);
+	        // 다음 파라미터들: picked + student_no
+	        for (Integer ex : excluded) {
+	            pstmt.setInt(index++, ex);
+	        }
+	
+	        ResultSet rs = pstmt.executeQuery();
+	        
+            if (rs.next()) {
+                student = new Student();
+                student.no = rs.getInt("no");
+                student.name = rs.getString("name");
+                student.age = rs.getInt("age");
+                student.mbti = rs.getString("mbti");
+                student.glass = rs.getBoolean("glass");
+            }
 		}
 		
-		return students;
+		return student;
 	}
 	
 	public Student getRandomStudent(boolean glass, ArrayList<Integer> picked) {

@@ -33,7 +33,7 @@ public class Controller {
         int rows = 4;
         int cols = 8;
 
-        String[][] seatArr = model.getRandomSeat(rows, cols);
+        String[][] seatArr = model.getRandomSeat();
         seatPrinter.print(seatArr);
     }
     
@@ -43,7 +43,7 @@ public class Controller {
     }
 
     // 3. 현재 자리 보기
-	public static void printNowSeats() {
+	public static void printCurrentSeats() {
 		
 	}
 
