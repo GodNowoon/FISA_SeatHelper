@@ -15,4 +15,5 @@ public class Student {
 	int age;
 	String mbti;
 	boolean glass;
+	
 }
