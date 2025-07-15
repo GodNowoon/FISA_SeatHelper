@@ -16,20 +16,20 @@ public class StartView {
 			
 			// 사용자가 입력한 메뉴에 따라 동작하는 로직
 			if (choice == 1) {  // 1. 모든 수강생 보기
+				view.printMessage("|번호|===이름====|출생연도| MBTI |");
+				view.printMessage("-----------------------------"); 
 				Controller.getAllStudents();
 			} else if (choice == 2) { // 2. 랜덤 자리 배치 보기
 				Controller.printRandomSeats();
 				
-				boolean save = view.askSave(); // 저장 여부 물어보기
-				
-				if (save) {
+				if (view.askSave()) {
 					Controller.saveSeats();
 					view.printMessage("자리 배치가 저장되었습니다!");
 				} else {
 					view.printMessage("저장하지 않고 메뉴로 돌아갑니다.");
 				}
 			} else if(choice == 3) { // 3. 현재 자리 보기
-				Controller.printNowSeats();
+				Controller.printCurrentSeats();
 			} else if (choice == 0) {
 				view.printMessage(RED + "\n❌ 프로그램을 종료합니다. 다음에 또 만나요! 💫" + RESET); 
 				break; // 0. 프로그램 종료
