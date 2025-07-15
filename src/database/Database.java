@@ -15,10 +15,12 @@ public class Database {
 	private static int[][] seats = new int[4][8];
 	
 	static {
+		BufferedReader br;
+		
 		try {
 			// 학생정보 읽기
 			FileReader fileReader = new FileReader(new File(studentFile));
-			BufferedReader br = new BufferedReader(fileReader);
+			br = new BufferedReader(fileReader);
 			
 			String line = "";
 			while((line = br.readLine()) != null) {
@@ -29,7 +31,7 @@ public class Database {
 				int age = Integer.parseInt(st.nextToken());
 				String mbti = st.nextToken();
 				boolean glass = (st.nextToken() == "TRUE");
-				
+								
 				students.add(new Student(num, name, age, mbti, glass));
 			}
 			
@@ -51,6 +53,7 @@ public class Database {
 		} catch(Exception e) {
 			e.printStackTrace();
 		} finally {
+//			br.close();
 		}
 	}
 	

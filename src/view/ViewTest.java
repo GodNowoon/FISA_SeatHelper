@@ -1,6 +1,9 @@
 package view;
 
+import controller.Controller;
+
 public class ViewTest {
+	
 	public static void main(String[] args) {
 		ConsoleView view = new ConsoleView();
 		
@@ -8,15 +11,15 @@ public class ViewTest {
 		int choice = view.getUserChoice();
 		
 		if (choice == 1) {  
-			controller.Controller.getAllStudents();
+			Controller.getAllStudents();
 		} else if (choice == 2) {
-			controller.Controller.printRandomSeats();
+			Controller.printRandomSeats();
 			view.printExitMessage(); 
-		}else if (choice == 0) {
+		} else if (choice == 0) {
 			view.printExitMessage(); 
-		}
-		else { 
+		} else { 
 			System.out.println("잘못된 입력입니다."); 
 		}
 	}
+	
 }
