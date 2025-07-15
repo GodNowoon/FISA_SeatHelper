@@ -1,16 +1,60 @@
 package database;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.stream.Collectors;
+
+import info.SeatInfo;
 
 public class Database {
 	
-	public void saveCurrentSeat() {
-		// 코드 작성 필요
+	public void saveCurrentSeatToDB() throws SQLException {
+		//text파일 가져오기    
+		String[][] seat = getCurrentSeat();
+	    int total = SeatInfo.ROW * SeatInfo.COL;
+
+	    // 1차원 이름 리스트 만들기
+		ArrayList<String> names = new ArrayList<>();
+		for (int i = 0; i < SeatInfo.ROW; i++) {
+			for (int j = 0; j < SeatInfo.COL; j++) {
+
+				if (seat[i][j].equals("빈자리"))
+					continue;
+
+				names.add(seat[i][j]);
+
+			}
+		}
+		
+		String placeholders = String.join(", ", Collections.nCopies(30, "?"));
+
+		String sql = "SELECT * FROM student " +
+		             "WHERE name IN (" + placeholders + ") " +
+		             "ORDER BY FIELD(name, " + placeholders + ")";
+
+		ArrayList<Integer> seatList = new ArrayList<>();
+
+	    try (Connection conn = DBUtil.getConnection();
+	            PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+	        int index = 1;
+	        for (String name : names) pstmt.setString(index++, name); // IN (...)
+	        for (String name : names) pstmt.setString(index++, name); // FIELD (...)
+
+	        ResultSet rs = pstmt.executeQuery();
+	        while (rs.next()) {
+	            seatList.add(rs.getInt("no"));
+	        }
+	    }
+
+	    
 	}
 
 	public ArrayList<Student> getAllStudents() throws SQLException {
@@ -98,15 +142,15 @@ public class Database {
 	    StringBuffer sqlBuffer = new StringBuffer();
 	    sqlBuffer.append("SELECT * FROM student ");
 
+        String placeholders = picked.stream().map(x -> "?").collect(Collectors.joining(", "));
+        
 	    if (glass) {
 	        sqlBuffer.append("WHERE glass = ? ");
 	        if (picked != null && !picked.isEmpty()) {
-	            String placeholders = picked.stream().map(x -> "?").collect(Collectors.joining(", "));
 	            sqlBuffer.append("AND no NOT IN (").append(placeholders).append(") ");
 	        }
 	    } else {
 	        if (picked != null && !picked.isEmpty()) {
-	            String placeholders = picked.stream().map(x -> "?").collect(Collectors.joining(", "));
 	            sqlBuffer.append("WHERE no NOT IN (").append(placeholders).append(") ");
 	        }
 	    }
@@ -144,6 +188,26 @@ public class Database {
 	    }
 
 	    return student;
+	}
+
+	public String[][] getCurrentSeat() {
+		String[][] seats = new String[SeatInfo.ROW][SeatInfo.COL];
+
+		try (BufferedReader br = new BufferedReader(new FileReader(SeatInfo.SEATFILE))) {
+			String line;
+			int row = 0;
+			while ((line = br.readLine()) != null && row < SeatInfo.ROW) {
+				String[] tokens = line.split("#");
+				for (int col = 0; col < tokens.length && col < SeatInfo.COL; col++) {
+					seats[row][col] = tokens[col];
+				}
+				row++;
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		return seats;
 	}
 
 

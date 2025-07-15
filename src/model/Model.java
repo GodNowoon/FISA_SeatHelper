@@ -80,43 +80,15 @@ public class Model {
 
 	// 현재 자리 파일에서 가져오기
 	public String[][] getCurrentSeat() {
-		String[][] seats = new String[SeatInfo.ROW][SeatInfo.COL];
-
-		try (BufferedReader br = new BufferedReader(new FileReader(SeatInfo.SEATFILE))) {
-			String line;
-			int row = 0;
-			while ((line = br.readLine()) != null && row < SeatInfo.ROW) {
-				String[] tokens = line.split("#");
-				for (int col = 0; col < tokens.length && col < SeatInfo.COL; col++) {
-					seats[row][col] = tokens[col];
-				}
-				row++;
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-
-		return seats;
+		return db.getCurrentSeat();
 	}
 
 	// 3. 현재 자리 저장
-	public void saveCurrentSeat() {
-		db.saveCurrentSeat();
+	public void saveCurrentSeat() throws SQLException {
+		db.saveCurrentSeatToDB();
 	}
-
-<<<<<<< HEAD
-    private Student getRandStudentNotPicked(ArrayList<Integer> picked, boolean glass) throws SQLException {
-        Student student = db.getRandomStudent(glass, picked);
-        if (student == null) {
-            System.out.println("⚠️ 더 이상 뽑을 학생이 없습니다! 빈자리로 처리합니다.");
-            return new Student(0, "빈자리", 0, "", false);
-        }
-        picked.add(student.getNo());
-        return student;
-    }
-=======
+	
 	// =========================== 로컬 함수 ===========================
->>>>>>> ab3b80be54bb9c71a9f5afe52246928817fc9ec3
 
 	private void swap(String[][] arr, int r1, int c1, int r2, int c2) {
 		String temp = arr[r1][c1];
@@ -124,8 +96,8 @@ public class Model {
 		arr[r2][c2] = temp;
 	}
 
-	private Student getRandStudentNotPicked(ArrayList<Integer> picked, boolean glassCondition) throws SQLException {
-		Student student = db.getRandomStudent(glassCondition, picked);
+	private Student getRandStudentNotPicked(ArrayList<Integer> picked, boolean glass) throws SQLException {
+		Student student = db.getRandomStudent(glass, picked);
 		if (student == null) {
 			System.out.println("⚠️ 더 이상 뽑을 학생이 없습니다! 빈자리로 처리합니다.");
 			return new Student(0, "빈자리", 0, "", false);

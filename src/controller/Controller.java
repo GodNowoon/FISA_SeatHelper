@@ -60,11 +60,16 @@ public class Controller {
 	// 2-1. 랜덤 자리 출력하고 저장 여부 받기
 	public static void saveSeats() {
 		
-		if (lastRandomSeats != null) {
-			model.saveCurrentSeat();
-			view.printMessage(GREEN + "✅ 자리 배치가 저장되었습니다!" + RESET);
-		} else {
-			view.printMessage(YELLOW + "⚠️ 먼저 랜덤 자리 배치를 실행하세요!" + RESET);
+		try {
+			if (lastRandomSeats != null) {
+				model.saveCurrentSeat();
+				view.printMessage(GREEN + "✅ 자리 배치가 저장되었습니다!" + RESET);
+			} else {
+				view.printMessage(YELLOW + "⚠️ 먼저 랜덤 자리 배치를 실행하세요!" + RESET);
+			}
+		} catch(SQLException e) {
+			view.printMessage("");	//===============================================================================================
+			e.printStackTrace();
 		}
 		
 	}
@@ -82,5 +87,7 @@ public class Controller {
 		}
 		
 	}
+	
+	
 	
 }

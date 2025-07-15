@@ -11,8 +11,7 @@ import java.util.Properties;
 public class DBUtil {
 	private static Properties dbInfo = new Properties();
 
-	private DBUtil() {
-	}
+	private DBUtil() {}
 
 	static {
 		try {
