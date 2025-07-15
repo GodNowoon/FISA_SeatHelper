@@ -10,11 +10,11 @@ public class SeatPrinter {
         System.out.println();
         System.out.println(BOLD + CYAN + "               ┌────────────────────────[ 칠판 ]────────────────────────┐" + RESET);
 
-        for (int i = 0; i < seats.length; i++) {
-        	System.out.print((i + 1) + " │ ");
-            for (int j = 0; j < seats[i].length; j++) {
+        for (int row = 0; row < seats.length; row++) {
+        	System.out.print((row + 1) + " │ ");
+            for (int col = 0; col < seats[row].length; col++) {
             	
-                String name = seats[i][j];
+                String name = seats[row][col];
                 if (name == null || name.isBlank()) {
                 	name = "";
                 }
@@ -22,7 +22,7 @@ public class SeatPrinter {
                 // 가운데 정렬된 이름 (7칸 고정)
                 String centeredName = centerText(name, 5);
 
-                if (j == 4) {
+                if (col == 4) {
                     System.out.print(" │   │ "); 
                 }
 

@@ -3,13 +3,11 @@ package view;
 import static view.AnsiColor.RED;
 import static view.AnsiColor.RESET;
 
-import java.sql.SQLException;
-
 import controller.Controller;
 
 public class StartView {
 
-	public static void main(String[] args) throws SQLException {
+	public static void main(String[] args) {
 		ConsoleView view = new ConsoleView();
 		
 		while (true) { // 사용자가 종료(0)하기전까지 메뉴 출력
@@ -24,9 +22,7 @@ public class StartView {
 			} else if (choice == 2) { // 2. 랜덤 자리 배치 보기
 				Controller.printRandomSeats();
 				
-				boolean save = view.askSave(); // 저장 여부 물어보기
-				
-				if (save) {
+				if (view.askSave()) {
 					Controller.saveSeats();
 					view.printMessage("자리 배치가 저장되었습니다!");
 				} else {

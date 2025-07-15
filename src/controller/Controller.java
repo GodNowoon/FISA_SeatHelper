@@ -1,20 +1,19 @@
 package controller;
 
+import static view.AnsiColor.RED;
+import static view.AnsiColor.RESET;
+
 import java.sql.SQLException;
 import java.util.ArrayList;
 
-import database.Database;
 import database.Student;
 import model.Model;
 import view.ConsoleView;
-import view.SeatPrinter;
 import view.StudentPrinter;
 
 public class Controller {
 	private static final Model model = Model.getModel();
-	private static final SeatPrinter seatPrinter = new SeatPrinter();
 	private static final StudentPrinter stuPrinter = new StudentPrinter();
-	private static final Database db = new Database();
 	static ConsoleView view = new ConsoleView();
 	private static String[][] lastRandomSeats; // 마지막 랜덤 자리 캐시
 
@@ -29,17 +28,22 @@ public class Controller {
 			} else {
 				view.printMessage("저장된 학생 데이터가 없습니다.");
 			}
-			
-		} catch(Exception e) {
+
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 
 	// 2. 랜덤 자리 출력
-	public static void printRandomSeats() throws SQLException {
-        String[][] randomSeats = model.getRandomSeat();
-        lastRandomSeats = randomSeats;
-        view.printSeatLayout(randomSeats);
+	public static void printRandomSeats() {
+		try {
+			String[][] randomSeats = model.getRandomSeat();
+			lastRandomSeats = randomSeats;
+			view.printSeatLayout(randomSeats);
+		} catch (SQLException e) {
+			view.printMessage(RED + "\n 다시 배치를 해 주세요!" + RESET);
+			e.printStackTrace();
+		}
 	}
 
 	// 2-1. 랜덤 자리 출력하고 저장 여부 받기
@@ -55,10 +59,10 @@ public class Controller {
 	// 3. 현재 자리 보기
 	public static void printCurrentSeats() {
 		String[][] currentSeats = model.getCurrentSeat();
-	    if (currentSeats != null) {
-	        view.printSeatLayout(currentSeats);
-	    } else {
-	        view.printMessage("⚠️ 현재 저장된 자리가 없습니다. 먼저 랜덤 배치를 실행하고 저장하세요!");
-	    }
+		if (currentSeats != null) {
+			view.printSeatLayout(currentSeats);
+		} else {
+			view.printMessage("⚠️ 현재 저장된 자리가 없습니다. 먼저 랜덤 배치를 실행하고 저장하세요!");
+		}
 	}
 }

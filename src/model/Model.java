@@ -32,40 +32,38 @@ public class Model {
         ArrayList<Integer> picked = new ArrayList<>();
 
         // 중앙 두 자리 먼저 배치 (안경 조건 true)
-        for (int r = 0; r < SeatInfo.ROW; r++) {
-            students[r][SeatInfo.COL / 2 - 1] = getRandStudentNotPicked(picked, true);
-            students[r][SeatInfo.COL / 2] = getRandStudentNotPicked(picked, true);
+        students[0][SeatInfo.COL / 2 - 1] = getRandStudentNotPicked(picked, true);
+        students[0][SeatInfo.COL / 2] = getRandStudentNotPicked(picked, true);
+        for (int row = 1; row < SeatInfo.ROW; row++) {
+            students[row][SeatInfo.COL / 2 - 1] = getRandStudentNotPicked(picked, false);
+            students[row][SeatInfo.COL / 2] = getRandStudentNotPicked(picked, false);
         }
 
         // 오른쪽 절반 채우기
-        for (int r = 0; r < SeatInfo.ROW; r++) {
-            for (int c = SeatInfo.COL / 2 + 1; c < SeatInfo.COL; c++) {
-                if (students[r][c - 1] != null) {
-                    students[r][c] = getParentStudentNotPicked(students[r][c - 1].getNo(), picked);
+        for (int row = 0; row < SeatInfo.ROW; row++) {
+            for (int col = SeatInfo.COL / 2 + 1; col < SeatInfo.COL; col++) {
+                if (students[row][col - 1] != null) {
+                    students[row][col] = getParentStudentNotPicked(students[row][col - 1].getNo(), picked);
                 } else {
-                    students[r][c] = getRandStudentNotPicked(picked, false);
+                    students[row][col] = getRandStudentNotPicked(picked, false);
                 }
             }
-        }
-
-        // 왼쪽 절반 채우기
-        for (int r = 0; r < SeatInfo.ROW; r++) {
-            for (int c = SeatInfo.COL / 2 - 2; c >= 0; c--) {
-                if (students[r][c + 1] != null) {
-                    students[r][c] = getParentStudentNotPicked(students[r][c + 1].getNo(), picked);
+            for (int col = SeatInfo.COL / 2 - 2; col >= 0; col--) {
+                if (students[row][col + 1] != null) {
+                    students[row][col] = getParentStudentNotPicked(students[row][col + 1].getNo(), picked);
                 } else {
-                    students[r][c] = getRandStudentNotPicked(picked, false);
+                    students[row][col] = getRandStudentNotPicked(picked, false);
                 }
             }
         }
 
         // 자리배치 이름으로 매핑
-        for (int r = 0; r < SeatInfo.ROW; r++) {
-            for (int c = 0; c < SeatInfo.COL; c++) {
-                if (students[r][c] == null || students[r][c].getName().isBlank())
-                    seat[r][c] = "빈자리";
+        for (int row = 0; row < SeatInfo.ROW; row++) {
+            for (int col = 0; col < SeatInfo.COL; col++) {
+                if (students[row][col] == null || students[row][col].getName().isBlank())
+                    seat[row][col] = "빈자리";
                 else
-                    seat[r][c] = students[r][c].getName();
+                    seat[row][col] = students[row][col].getName();
             }
         }
 
@@ -84,9 +82,9 @@ public class Model {
         try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
             String line;
             int row = 0;
-            while ((line = br.readLine()) != null && row < 4) {
+            while ((line = br.readLine()) != null && row < SeatInfo.ROW) {
                 String[] tokens = line.split("#");
-                for (int col = 0; col < tokens.length && col < 8; col++) {
+                for (int col = 0; col < tokens.length && col < SeatInfo.COL; col++) {
                     seats[row][col] = tokens[col];
                 }
                 row++;
