@@ -14,6 +14,8 @@ import java.util.ArrayList;
 import java.util.StringTokenizer;
 import java.util.stream.Collectors;
 
+import org.junit.Test;
+
 import info.SeatInfo;
 
 
@@ -71,6 +73,7 @@ public class Database {
 		
 	}
 	
+	@Test
 	public ArrayList<Student> getAllStudents() throws SQLException {
 		
 		String sql = "select * from student";
@@ -147,6 +150,6 @@ public class Database {
 	}
 	
 	public Student getRandomStudent(boolean glass, ArrayList<Integer> picked) {
-		
+		return null;
 	}
 }
