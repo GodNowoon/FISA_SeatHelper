@@ -16,7 +16,7 @@ public class SeatPrinter {
             	
                 String name = seats[i][j];
                 if (name == null || name.isBlank()) {
-                	name = "";//null ?????
+                	name = "";
                 }
 
                 // 가운데 정렬된 이름 (7칸 고정)
