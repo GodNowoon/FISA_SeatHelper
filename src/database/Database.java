@@ -26,6 +26,8 @@ public class Database {
 //    private static Session sshSession;
 	
 	static {
+		BufferedReader br;
+		
 		try {
 			// Oracle Driver 로드
 			Class.forName("oracle.jdbc.driver.OracleDriver");
@@ -52,7 +54,7 @@ public class Database {
 			
 			// 학생정보 읽기
 			FileReader fileReader = new FileReader(new File(studentFile));
-			BufferedReader br = new BufferedReader(fileReader);
+			br = new BufferedReader(fileReader);
 			
 			String line = "";
 			while((line = br.readLine()) != null) {
@@ -63,7 +65,7 @@ public class Database {
 				int age = Integer.parseInt(st.nextToken());
 				String mbti = st.nextToken();
 				boolean glass = (st.nextToken() == "TRUE");
-				
+								
 				students.add(new Student(num, name, age, mbti, glass));
 			}
 			
@@ -85,7 +87,7 @@ public class Database {
 		} catch(Exception e) {
 			e.printStackTrace();
 		} finally {
-//			closeSSHTunnel();
+			
 		}
 	}
 	
