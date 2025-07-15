@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import database.Student;
 import model.Model;
+import view.ConsoleView;
 import view.SeatPrinter;
 import view.StudentPrinter;
 
@@ -11,6 +12,7 @@ public class Controller {
     private static final Model model = Model.getModel();
     private static final SeatPrinter seatPrinter = new SeatPrinter();
     private static final StudentPrinter stuPrinter = new StudentPrinter();
+    static ConsoleView view = new ConsoleView();
     
     // 1. 전체 수강생 목록 가져오기
     public static void getAllStudents() {
@@ -21,7 +23,7 @@ public class Controller {
                 stuPrinter.print(stu); 
             }
         } else {
-            System.out.println("학생 데이터 없음");
+        	view.printMessage("저장된 학생 데이터가 없습니다.");
         }
     }
 
@@ -34,5 +36,17 @@ public class Controller {
         String[][] seatArr = model.getRandomSeat(rows, cols);
         seatPrinter.print(seatArr);
     }
+    
+    // 2-1. 랜덤 자리 출력하고 저장 여부 받기
+    public static void saveSeats() {
+    	
+    }
+
+    // 3. 현재 자리 보기
+	public static void printNowSeats() {
+		
+	}
+
+
 
 }

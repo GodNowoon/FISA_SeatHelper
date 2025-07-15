@@ -1,6 +1,13 @@
 package view;
 
-import static view.AnsiColor.*;
+import static view.AnsiColor.BLUE;
+import static view.AnsiColor.BOLD;
+import static view.AnsiColor.CYAN;
+import static view.AnsiColor.GREEN;
+import static view.AnsiColor.PURPLE;
+import static view.AnsiColor.RED;
+import static view.AnsiColor.RESET;
+import static view.AnsiColor.YELLOW;
 
 public class ConsoleView {
     private final MenuInputHandler inputHandler;
@@ -23,20 +30,27 @@ public class ConsoleView {
         System.out.println(BLUE + "=========================================================================================" + RESET);
         System.out.println(YELLOW + " 1. 모든 수강생 보기");
         System.out.println(YELLOW + " 2. 랜덤 자리 배치 보기");
+        System.out.println(YELLOW + " 3. 현재 자리 보기");
         System.out.println(" 0. 종료" + RESET);
         System.out.println("-----------------------------------------------------------------------------------------");
         System.out.print(" 메뉴를 선택하세요 " + GREEN + "▶ " + RESET);
     }
 
+    // 사용자 메뉴 입력
     public int getUserChoice() {
-        return inputHandler.getUserChoice();
+        return inputHandler.getUserMenuChoice();
     }
-
+    // 사용자 저장 여부 입력
+    public boolean askSave() {
+    	return inputHandler.getUserSaveChoice();
+    }
+    // 자리 출력
     public void printSeatLayout(String[][] seatArray) {
         seatPrinter.print(seatArray);
     }
-
-    public void printExitMessage() {
-        System.out.println(RED + "\n❌ 프로그램을 종료합니다. 다음에 또 만나요! 💫" + RESET);
+    // 메세지 출력
+    public void printMessage(String msg) {
+        System.out.println(msg);
     }
+
 }

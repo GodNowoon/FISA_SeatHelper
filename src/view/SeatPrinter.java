@@ -16,7 +16,7 @@ public class SeatPrinter {
             	
                 String name = seats[i][j];
                 if (name == null || name.isBlank()) {
-                	name = "";//null ?????
+                	name = "";
                 }
 
                 // 가운데 정렬된 이름 (7칸 고정)
@@ -35,6 +35,7 @@ public class SeatPrinter {
         System.out.println();
         System.out.println(CYAN + "=========================================================================================" + RESET);
     }
+    
 
     // 가운데 정렬을 위한 헬퍼 메서드
     private String centerText(String text, int width) {
