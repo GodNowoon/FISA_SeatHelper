@@ -1,63 +1,18 @@
 package database;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.StringTokenizer;
 import java.util.stream.Collectors;
 
-import org.junit.Test;
-
-import info.SeatInfo;
-
 public class Database {
-	private static String seatFile = "src/database/seat.txt";
-	private static String[][] currentSeat = new String[SeatInfo.ROW][SeatInfo.COL];
-
-	static {
-		BufferedReader br = null;
-		try {
-			// 책상정보 읽기
-			FileReader fileReader = new FileReader(new File(seatFile));
-			br = new BufferedReader(fileReader);
-
-			String line = "";
-			while ((line = br.readLine()) != null) {
-				StringTokenizer st = new StringTokenizer(line, "#");
-
-				for (int i = 0; i < SeatInfo.ROW; i++) {
-					String name = st.nextToken();
-					for (int j = 0; j < SeatInfo.COL; j++) {
-						currentSeat[i][j] = name;
-					}
-				}
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		} finally {
-			try {
-				br.close();
-			} catch(IOException e) {
-				e.printStackTrace();
-			}
-		}
-	}
-
-	public String[][] getCurrentSeat() {
-		return currentSeat;
-	}
-
+	
 	public void saveCurrentSeat() {
 		// 코드 작성 필요
 	}
 
-	@Test
 	public ArrayList<Student> getAllStudents() throws SQLException {
 
 		String sql = "select * from student";
@@ -65,19 +20,21 @@ public class Database {
 		ArrayList<Student> students = null;
 
 		try (Connection conn = DBUtil.getConnection(); 
-				PreparedStatement pstmt = conn.prepareStatement(sql);) {
-			
-			ResultSet rs = pstmt.executeQuery();
+			PreparedStatement pstmt = conn.prepareStatement(sql);
+			ResultSet rs = pstmt.executeQuery()) {
 
 			students = new ArrayList<>();
+			
+			Student student = null;
+			
 			while (rs.next()) {
-				Student student = new Student();
-
-				student.no = rs.getInt("no");
-				student.name = rs.getString("name");
-				student.age = rs.getInt("age");
-				student.mbti = rs.getString("mbti");
-				student.glass = rs.getBoolean("glass");
+				
+				student = new Student(
+						rs.getInt("no"), 
+						rs.getString("name"), 
+						rs.getInt("age"), 
+						rs.getString("mbti"),
+						rs.getBoolean("glass"));
 
 				students.add(student);
 			}
@@ -93,24 +50,30 @@ public class Database {
 
 		// IN (?, ?, ?, ...) 생성
 		String placeholders = excluded.stream().map(x -> "?").collect(Collectors.joining(", "));
+ 
+		StringBuffer sqlBuffer = new StringBuffer();
+	    sqlBuffer.append("SELECT s.no, s.name, s.age, s.mbti, s.glass ")
+	             .append("FROM partner_history ph ")
+	             .append("JOIN student s ON ph.partner_no = s.no ")
+	             .append("WHERE ph.student_no = ? ");
 
-		String sql = "SELECT s.no, s.name, s.age, s.mbti, s.glass " 
-				+ "FROM partner_history ph "
-				+ "JOIN student s ON ph.partner_no = s.no " 
-				+ "WHERE ph.student_no = ? "
-				+ "AND ph.partner_no NOT IN (" + placeholders + ") " 
-				+ "GROUP BY ph.partner_no " 
-				+ "ORDER BY COUNT(*) ASC, ph.partner_no ASC "
-				+ "LIMIT 1";
+	    if (!excluded.isEmpty()) {
+	        sqlBuffer.append("AND ph.partner_no NOT IN (").append(placeholders).append(") ");
+	    }
 
+	    sqlBuffer.append("GROUP BY ph.partner_no ")
+	             .append("ORDER BY COUNT(*) ASC, ph.partner_no ASC ")
+	             .append("LIMIT 1");
+
+		
 		Student student = null;
 
 		try (Connection conn = DBUtil.getConnection(); 
-				PreparedStatement pstmt = conn.prepareStatement(sql);) {
+				PreparedStatement pstmt = conn.prepareStatement(sqlBuffer.toString())) {
 
 			int index = 1;
 			pstmt.setInt(index++, no);
-			// 다음 파라미터들: picked + student_no
+
 			for (Integer ex : excluded) {
 				pstmt.setInt(index++, ex);
 			}
@@ -118,65 +81,71 @@ public class Database {
 			ResultSet rs = pstmt.executeQuery();
 
 			if (rs.next()) {
-				student = new Student();
-				student.no = rs.getInt("no");
-				student.name = rs.getString("name");
-				student.age = rs.getInt("age");
-				student.mbti = rs.getString("mbti");
-				student.glass = rs.getBoolean("glass");
+				student = new Student(
+						rs.getInt("no"),
+						rs.getString("name"), 
+						rs.getInt("age"), 
+						rs.getString("mbti"),
+						rs.getBoolean("glass"));
 			}
 		}
 
 		return student;
 	}
 
+	
 	public Student getRandomStudent(boolean glass, ArrayList<Integer> picked) throws SQLException {
-		String sql = "SELECT * FROM student ";
-		
-		if (picked == null || picked.isEmpty()) {
-			if(glass) {
-				sql += "WHERE glass = ? ";
-			}
-		} else {
-			String placeholders = picked.stream().map(x -> "?").collect(Collectors.joining(", "));
-			if(glass) {
-				sql += "WHERE glass = ? AND no NOT IN (" + placeholders + ") ";
-			} else {
-				sql += "WHERE no NOT IN (" + placeholders + ") ";
-			}
-		}
-		
-		sql += "ORDER BY RAND() LIMIT 1";
+	    StringBuffer sqlBuffer = new StringBuffer();
+	    sqlBuffer.append("SELECT * FROM student ");
 
-		Student student = null;
+	    if (glass) {
+	        sqlBuffer.append("WHERE glass = ? ");
+	        if (picked != null && !picked.isEmpty()) {
+	            String placeholders = picked.stream().map(x -> "?").collect(Collectors.joining(", "));
+	            sqlBuffer.append("AND no NOT IN (").append(placeholders).append(") ");
+	        }
+	    } else {
+	        if (picked != null && !picked.isEmpty()) {
+	            String placeholders = picked.stream().map(x -> "?").collect(Collectors.joining(", "));
+	            sqlBuffer.append("WHERE no NOT IN (").append(placeholders).append(") ");
+	        }
+	    }
 
-		try (Connection conn = DBUtil.getConnection(); 
-				PreparedStatement pstmt = conn.prepareStatement(sql)) {
+	    sqlBuffer.append("ORDER BY RAND() LIMIT 1");
 
-			int index = 1;
-			if (glass) {
-				pstmt.setBoolean(index++, true);
-			}
+	    Student student = null;
 
-			if (picked != null && !picked.isEmpty()) {
-				for (Integer p : picked) {
-					pstmt.setInt(index++, p);
-				}
-			}
+	    try (Connection conn = DBUtil.getConnection();
+	         PreparedStatement pstmt = conn.prepareStatement(sqlBuffer.toString())) {
 
-			ResultSet rs = pstmt.executeQuery();
-			if (rs.next()) {
-				student = new Student();
-				student.no = rs.getInt("no");
-				student.name = rs.getString("name");
-				student.age = rs.getInt("age");
-				student.mbti = rs.getString("mbti");
-				student.glass = rs.getBoolean("glass");
-			}
-		}
+	        int index = 1;
 
-		return student;
+	        if (glass) {
+	            pstmt.setBoolean(index++, true);
+	        }
+
+	        if (picked != null && !picked.isEmpty()) {
+	            for (Integer p : picked) {
+	                pstmt.setInt(index++, p);
+	            }
+	        }
+
+	        try (ResultSet rs = pstmt.executeQuery()) {
+	            if (rs.next()) {
+	                student = new Student(
+	                        rs.getInt("no"),
+	                        rs.getString("name"),
+	                        rs.getInt("age"),
+	                        rs.getString("mbti"),
+	                        rs.getBoolean("glass")
+	                );
+	            }
+	        }
+	    }
+
+	    return student;
 	}
+
 
 }
 
