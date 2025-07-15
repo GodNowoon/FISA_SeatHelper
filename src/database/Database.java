@@ -131,20 +131,22 @@ public class Database {
 	}
 
 	public Student getRandomStudent(boolean glass, ArrayList<Integer> picked) throws SQLException {
-		String sql;
-		// 죄송합니다 강사님 수정하도록 하겠습니다 사랑합니다
+		String sql = "SELECT * FROM student ";
+		
 		if (picked == null || picked.isEmpty()) {
 			if(glass) {
-				sql = "SELECT * FROM student WHERE glass = ? ORDER BY RAND() LIMIT 1";
-			} else {
-				sql = "SELECT * FROM student ORDER BY RAND() LIMIT 1";
+				sql += "WHERE glass = ? ";
 			}
 		} else {
 			String placeholders = picked.stream().map(x -> "?").collect(Collectors.joining(", "));
-			sql = glass ? "SELECT * FROM student WHERE glass = ? AND no NOT IN (" + placeholders
-							+ ") ORDER BY RAND() LIMIT 1"
-					: "SELECT * FROM student WHERE no NOT IN (" + placeholders + ") ORDER BY RAND() LIMIT 1";
+			if(glass) {
+				sql += "WHERE glass = ? AND no NOT IN (" + placeholders + ") ";
+			} else {
+				sql += "WHERE no NOT IN (" + placeholders + ") ";
+			}
 		}
+		
+		sql += "ORDER BY RAND() LIMIT 1";
 
 		Student student = null;
 
@@ -177,3 +179,4 @@ public class Database {
 	}
 
 }
+

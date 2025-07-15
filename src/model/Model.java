@@ -109,8 +109,8 @@ public class Model {
         arr[r2][c2] = temp;
     }
 
-    private Student getRandStudentNotPicked(ArrayList<Integer> picked, boolean glassCondition) throws SQLException {
-        Student student = db.getRandomStudent(glassCondition, picked);
+    private Student getRandStudentNotPicked(ArrayList<Integer> picked, boolean glass) throws SQLException {
+        Student student = db.getRandomStudent(glass, picked);
         if (student == null) {
             System.out.println("⚠️ 더 이상 뽑을 학생이 없습니다! 빈자리로 처리합니다.");
             return new Student(0, "빈자리", 0, "", false);
