@@ -84,8 +84,9 @@ public class Model {
 	}
 
 	// 3. 현재 자리 저장
-	public void saveCurrentSeat() throws SQLException {
-		db.saveCurrentSeatToDB();
+	public void saveCurrentSeat(String[][] seat) throws SQLException {
+		db.saveCurrentSeatToFile(seat);
+		db.saveCurrentSeatToDB(seat);
 	}
 	
 	// =========================== 로컬 함수 ===========================

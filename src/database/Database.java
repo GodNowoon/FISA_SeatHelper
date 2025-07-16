@@ -1,7 +1,9 @@
 package database;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -15,11 +17,7 @@ import info.SeatInfo;
 
 public class Database {
 	
-	public void saveCurrentSeatToDB() throws SQLException {
-		//text파일 가져오기    
-		String[][] seat = getCurrentSeat();
-	    int total = SeatInfo.ROW * SeatInfo.COL;
-
+	public void saveCurrentSeatToDB(String[][] seat) throws SQLException {
 	    // 1차원 이름 리스트 만들기
 		ArrayList<String> names = new ArrayList<>();
 		for (int i = 0; i < SeatInfo.ROW; i++) {
@@ -35,27 +33,77 @@ public class Database {
 		
 		String placeholders = String.join(", ", Collections.nCopies(30, "?"));
 
-		String sql = "SELECT * FROM student " +
-		             "WHERE name IN (" + placeholders + ") " +
-		             "ORDER BY FIELD(name, " + placeholders + ")";
+		String sql = "SELECT * FROM student " + 
+				"WHERE name IN (" + placeholders + ") " + 
+				"ORDER BY FIELD(name, " + placeholders + ")";
 
 		ArrayList<Integer> seatList = new ArrayList<>();
 
+		try (Connection conn = DBUtil.getConnection(); 
+				PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+			int index = 1;
+			for (String name : names)
+				pstmt.setString(index++, name); // IN (...)
+			for (String name : names)
+				pstmt.setString(index++, name); // FIELD (...)
+
+			ResultSet rs = pstmt.executeQuery();
+			while (rs.next()) {
+				seatList.add(rs.getInt("no"));
+			}
+			
+		}
+
+		ArrayList<int[]> pairs = new ArrayList<>();
+
+		for (int idx = 0; idx < seatList.size(); idx++) {
+			int row = idx / SeatInfo.COL;
+			int col = idx % SeatInfo.COL;
+			int currNo = seatList.get(idx);
+			
+			int left = idx - 1;
+			int right = idx + 1;
+
+			if (row == 3) {	// 2차원에서 1차원으로 변경되며 뒷자리 별도 처리
+			    if (col != 1 && col != 5) {	// 각 팀별 우측자리
+			        pairs.add(new int[]{currNo, seatList.get(right)});
+			    }
+			    if (col != 0 && col != 2) {	// 각 팀별 좌측자리
+			        pairs.add(new int[]{currNo, seatList.get(left)});
+			    }
+			} else {
+			    if (col != SeatInfo.COL / 2 && col != SeatInfo.COL - 1) {
+			        pairs.add(new int[]{currNo, seatList.get(right)});
+			    }
+			    if (col != 0 && col != SeatInfo.COL / 2 - 1) {
+			        pairs.add(new int[]{currNo, seatList.get(left)});
+			    }
+			}
+
+		}
+	    
+	    // INSERT 쿼리 생성
+	    String valuePlaceholders = pairs.stream()
+	        .map(p -> "(?, ?, CURDATE())")
+	        .collect(Collectors.joining(", "));
+
+	    String insertSql = "INSERT INTO partner_history (student_no, partner_no, date) VALUES " + valuePlaceholders;
+
 	    try (Connection conn = DBUtil.getConnection();
-	            PreparedStatement pstmt = conn.prepareStatement(sql)) {
+	         PreparedStatement pstmt = conn.prepareStatement(insertSql)) {
 
 	        int index = 1;
-	        for (String name : names) pstmt.setString(index++, name); // IN (...)
-	        for (String name : names) pstmt.setString(index++, name); // FIELD (...)
-
-	        ResultSet rs = pstmt.executeQuery();
-	        while (rs.next()) {
-	            seatList.add(rs.getInt("no"));
+	        for (int[] pair : pairs) {
+	            pstmt.setInt(index++, pair[0]);
+	            pstmt.setInt(index++, pair[1]);
 	        }
-	    }
 
+	        pstmt.executeUpdate();
+	    }
 	    
 	}
+	
 
 	public ArrayList<Student> getAllStudents() throws SQLException {
 
@@ -86,6 +134,7 @@ public class Database {
 
 		return students;
 	}
+	
 
 	public Student getPartnerStudentByNo(int no, ArrayList<Integer> picked) throws SQLException {
 
@@ -190,6 +239,7 @@ public class Database {
 	    return student;
 	}
 
+	
 	public String[][] getCurrentSeat() {
 		String[][] seats = new String[SeatInfo.ROW][SeatInfo.COL];
 
@@ -210,6 +260,24 @@ public class Database {
 		return seats;
 	}
 
+	public void saveCurrentSeatToFile(String[][] seat) {
+		
+	    try (BufferedWriter bw = new BufferedWriter(new FileWriter(SeatInfo.SEATFILE))) {
+	        for (int row = 0; row < SeatInfo.ROW; row++) {
+	            StringBuilder line = new StringBuilder();
+	            for (int col = 0; col < SeatInfo.COL; col++) {
+	                if (col > 0) 
+	                	line.append("#");
+	                line.append(seat[row][col]);
+	            }
+	            bw.write(line.toString());
+	            bw.newLine();
+	        }
+	    } catch (IOException e) {
+	        e.printStackTrace();
+	    }
+	    
+	}
 
 }
 

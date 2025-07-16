@@ -62,7 +62,7 @@ public class Controller {
 		
 		try {
 			if (lastRandomSeats != null) {
-				model.saveCurrentSeat();
+				model.saveCurrentSeat(lastRandomSeats);
 				view.printMessage(GREEN + "✅ 자리 배치가 저장되었습니다!" + RESET);
 			} else {
 				view.printMessage(YELLOW + "⚠️ 먼저 랜덤 자리 배치를 실행하세요!" + RESET);
